@@ -1,0 +1,63 @@
+\documentclass[eprint]{article} %{revtex4-1}%
+\usepackage{amssymb}  % include amsfonts package
+\usepackage{amsfonts}  % American Math Society fonts, define \mathbb, \mathfrak 
+\usepackage{amsmath}  % multi-lines formulars, \cfrac
+\usepackage{amsthm}  % provide a PROOF enviroment
+\usepackage{bm}  % bold math
+\usepackage{bbm}  % hollow math
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{bbding}
+
+\begin{document}
+
+\title{Note}
+\author{Wayne Zheng}
+%\email[\Envelope\quad]{intuitionofmind@gmail.com}
+%\homepage[\HandRight\quad]{http://intuitionofmind.bitbucket.org/}
+%\affiliation{Institute for Advanced Study, Tsinghua University, Beijing, 100084, China}
+
+%\begin{abstract}
+%\end{abstract}
+
+\maketitle
+
+\section{Time evolution} 
+
+Consider time $t=N\Delta{t}$. $\Delta{t}$ is the numerical integration step length. In the first place we choose Taylor expansion to deal with it:
+\begin{equation}
+    e^{\text{i}tH}=\sum_{n=0}^{\infty}\frac{(\text{i}tH)^{n}}{n!}.
+\end{equation}
+Of cousre we cannot compute to the infinite order practically thus we shall determine the order $n_{c}$ to be cut off. Factorial grows faster than the exponential with a constant base. Here we define the cut-off criterion as
+\begin{equation}
+    \epsilon=\langle\psi|\frac{(tH)^{n_{c}}}{n_{c}!}|\psi\rangle\leq{10^{-15}}.
+    \label{}
+\end{equation}
+Alternatively, we can integrate step by step as
+\begin{equation}
+    |\psi(t)\rangle=\left(e^{-\text{i}\Delta{t}H}\right)^{N}|\psi(0)\rangle,\quad |\psi_{n+1}\rangle\simeq(1-\text{i}\Delta{t}H)|\psi_{n}\rangle.
+    \label{}
+\end{equation}
+
+Askar proposed another method in terms of the differentiation between $|\psi_{n+1}\rangle$ and $|\psi_{n-1}\rangle$
+\begin{equation}
+    |\psi_{n+1}\rangle-|\psi_{n-1}\rangle=\left(e^{-\text{i}\Delta{t}H}-e^{\text{i}\Delta{t}H}\right)|\psi_{n}\rangle\simeq-2\text{i}\Delta{t}H|\psi_{n}\rangle.
+    \label{}
+\end{equation}
+While this scheme is still not unitary. Goldberg proposed to replace the step approximation by a unitary one
+\begin{equation}
+    e^{-\text{i}\Delta{t}H}\simeq\frac{1-\frac{1}{2}\text{i}\Delta{t}H}{1+\frac{1}{2}\text{i}\Delta{t}H}
+    \label{}
+\end{equation}
+
+and one can obtain an improved version of Askar method
+\begin{equation}
+    |\psi_{n+1}\rangle\simeq|\psi_{n-1}\rangle-\frac{2\text{i}\Delta{t}H}{1+\frac{1}{4}\Delta{t}^{2}H^{2}}\simeq|\psi_{n-1}\rangle-2\text{i}\Delta{t}H\left(1-\frac{1}{4}\Delta{t}^{2}H^{2}\right)|\psi_{n}\rangle.
+    \label{}
+\end{equation}
+
+\bibliographystyle{apsrev4-1} 
+\bibliography{noteBib}
+\end{document} 
+
