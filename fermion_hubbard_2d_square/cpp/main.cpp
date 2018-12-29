@@ -13,7 +13,7 @@ int main() {
         int numEleDown = 4;
         int numSiteX = 8;
         int numSiteY = 1;
-        double U = 8.0;
+        double U = 1.0;
         int numSam = 1;
         int numEval = 10;
 
@@ -32,7 +32,7 @@ int main() {
         // for (int j = 0; j < n; ++j) { std::cout << bb[j]; }
         // std::cout << std::endl;
 
-        Hubbard<arcomplex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "OBC", "OBC");
+        Hubbard<arcomplex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "PBC", "OBC");
         int dim = Hub.HilbertDim();
         auto u = new arcomplex<double>[dim];
         auto v = new arcomplex<double>[dim];
@@ -40,7 +40,7 @@ int main() {
         Hub.SetOne(u, 2);
         Hub.SetOne(w, 0);
         Hub.Hamiltonian(u, v);
-        std::cout << "Matrix element: "  << Hub.Dot(u, v) << std::endl;
+//        std::cout << "Matrix element: "  << Hub.Dot(u, v) << std::endl;
         delete [] u;
         delete [] v;
         delete [] w;
@@ -83,6 +83,7 @@ int main() {
 
         end = time(NULL);
         file_log << "Time: " << (end-start)/60.0 << " min" << std::endl;
+        std::cout << "Time: " << (end-start) << " s" << std::endl;
         file_eigvals.close();
         file_eigvecs.close();
         file_log.close();

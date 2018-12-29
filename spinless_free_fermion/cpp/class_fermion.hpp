@@ -102,7 +102,6 @@ void FreeFermion<T>::Hamiltonian(T* v, T* w) {
                             boost::dynamic_bitset<> temp(config);
                             temp.flip(current);
                             temp.flip(forward);
-                            // std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                             std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
 
                             w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
@@ -116,7 +115,6 @@ void FreeFermion<T>::Hamiltonian(T* v, T* w) {
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
-                                // std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
                                 }
@@ -129,7 +127,6 @@ void FreeFermion<T>::Hamiltonian(T* v, T* w) {
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
-                                // std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
                                 }

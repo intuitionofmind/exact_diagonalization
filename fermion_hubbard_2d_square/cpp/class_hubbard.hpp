@@ -55,14 +55,15 @@ Hubbard<T>::Hubbard (double u, int numUp, int numDown, int numSiteX, int numSite
                         for (int k = 0; k < numSite; ++k) { bit.push_back(bitUp[k]); } // Basis of tensor product of up- and down-spins.
                         for (int k = 0; k < numSite; ++k) { bit.push_back(bitDown[k]); }
                         mBasis.push_back(bit.to_ulong());
-                        std::cout << bit.to_ulong() << " ";
-                        for (int l = 0; l < numSite*2; ++l) { std::cout << bit[l]; }
-                        std::cout << std::endl;
+                        // std::cout << bit.to_ulong() << " ";
+                        // for (int l = 0; l < numSite*2; ++l) { std::cout << bit[l]; }
+                        // std::cout << std::endl;
                         ++dim;
                         }
                     }
                 }
             }
+        std::sort(mBasis.begin(), mBasis.end());
         mDim = dim;
         std::cout << mDim << std::endl;
         }
@@ -130,17 +131,10 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                             boost::dynamic_bitset<> temp(config);
                             temp.flip(current);
                             temp.flip(forward);
-                            std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
-/*
-                            for (int p = 0; p < numSite*2; ++p) { std::cout << config[p]; }
-                            std::cout << std::endl;
-                            for (int p = 0; p < numSite*2; ++p) { std::cout << temp[p]; }
-                            std::cout << std::endl;
-                            std::cout << config.to_ulong() << " " << temp.to_ulong() << " " << std::distance(mBasis.begin(), it) << " " << cross << std::endl;
-                            */
-
+                            std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                             w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
                             }
+
                         // For the boundary hoppings.
                         else if (flagX && "PBC" == mBouConX) {
                             if (config[current] ^ config[forward]) {
@@ -150,7 +144,7 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
-                                std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
+                                std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
                                 }
                             }
@@ -162,7 +156,7 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
-                                std::vector<int>::iterator it = std::find(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
+                                std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
                                 w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
                                 }
                             }
