@@ -9,8 +9,8 @@ int main() {
         time_t start, end;
         start = time(NULL);
 
-        int numEle = 8;
-        int numSiteX = 16;
+        int numEle = 4;
+        int numSiteX = 8;
         int numSiteY = 1;
         int numEval = 20;
 

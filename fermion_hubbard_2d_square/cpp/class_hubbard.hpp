@@ -65,7 +65,6 @@ Hubbard<T>::Hubbard (double u, int numUp, int numDown, int numSiteX, int numSite
             }
         std::sort(mBasis.begin(), mBasis.end());
         mDim = dim;
-        std::cout << mDim << std::endl;
         }
 
 // Class destructor.
@@ -127,7 +126,7 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                         if ((forward > current) && (config[current] ^ config[forward])) {
                             int cross = 0; // Count how many fermions crossed by the operator.
                             for (int m = current+1; m < forward; ++m) { if (config[m]) { ++cross; } }
-                            double fSign = pow(-1.0, cross);
+                            T fSign = pow(-1.0, cross);
                             boost::dynamic_bitset<> temp(config);
                             temp.flip(current);
                             temp.flip(forward);
@@ -140,7 +139,7 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                             if (config[current] ^ config[forward]) {
                                 int cross = 0;
                                 for (int m = forward+1; m < current; ++m) { if (config[m]) { ++cross; } }
-                                double fSign = pow(-1.0, cross);
+                                T fSign = pow(-1.0, cross);
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
@@ -152,7 +151,7 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                             if (config[current] ^ config[forward]) {
                                 int cross = 0;
                                 for (int m = forward+1; m < current; ++m) { if (config[m]) { ++cross; } }
-                                double fSign = pow(-1.0, cross);
+                                T fSign = pow(-1.0, cross);
                                 boost::dynamic_bitset<> temp(config);
                                 temp.flip(current);
                                 temp.flip(forward);
@@ -165,6 +164,35 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
                 }
             }
         }
+
+// Note that the ArcomStdEig() in ARPACKPP will not sort the eigenvalues you want while ArsymStdEig() does. SortEval() funtion helps you to sort the eigenvalues and its order is stored in the vector "order" such that you can access the i'th smallest eigenvalues according to "order[i]" in the original sequence. 
+/*
+template<typename T>
+void Hubbard<T>::Sort(int n, T* w, T* v) { 
+        std::vector<double> vec;
+        for (int i = 0; i < n; ++i) { vec.push_back(std::real(w[i])); }
+        std::sort(vec.begin(), vec.end());
+
+        auto temp = new T[mDim*n];
+
+        for (int i = 0; i < n; ++i) {
+            std::vector<int>::iterator it = std::find(vec.begin(), vec.end(), std::real(w[i])); 
+            w[i] = T(vec[i]);
+            }
+
+
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                std::vector<int>::iterator it = std::find(order.begin(), order.end(), j); 
+                if (std::real(w2[i]) == std::real(w1[j]) && it == order.end()) {
+                    order.push_back(j);
+                    }
+                }
+            }
+
+        delete [] temp;
+        }
+    */
 
 template<typename T>
 void Hubbard<T>::SetOne(T* v, int i) {
@@ -189,7 +217,7 @@ void Hubbard<T>::PrintHam() {
                 SetOne(v, i);
                 SetOne(w, j);
                 Hamiltonian(w, u);
-                std::cout << std::real(Dot(v, u)) << " "; 
+                std::cout << std::real(Dot(v, u)) << ", ";
                 }
             std::cout << std::endl;
             }
