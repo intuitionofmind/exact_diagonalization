@@ -22,6 +22,7 @@ class Hubbard {
         ~Hubbard (); // Destructor.
 
         int HilbertDim();
+        void SaveHilbert();
         int Coordinate(int x, int y);
         void Hamiltonian(T* v, T* w);
         
@@ -72,10 +73,17 @@ template<typename T>
 Hubbard<T>::~Hubbard() {}
 
 template<typename T>
-int Hubbard<T>::Coordinate(int x, int y) { return y*mNumSiteX+x; }
+int Hubbard<T>::HilbertDim() { return mDim; }
 
 template<typename T>
-int Hubbard<T>::HilbertDim() { return mDim; }
+void Hubbard<T>::SaveHilbert() {
+        std::ofstream file_hilbert("hilbert_space", std::ios_base::app);
+        for (int l = 0; l < mDim; ++l) { file_hilbert << mBasis[l] << ","; }
+        file_hilbert.close();
+        }
+
+template<typename T>
+int Hubbard<T>::Coordinate(int x, int y) { return y*mNumSiteX+x; }
 
 // Required by Arpack++ package handbook: There only requirements make by ARPACK++ are that member funtion Hamiltonian() musth have two pointers to vectors of type T as paraments and the input vector must precede the output vector.
 template<typename T>

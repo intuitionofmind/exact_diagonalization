@@ -11,47 +11,52 @@ int main() {
 
         int numEleUp = 4;
         int numEleDown = 4;
-        int numSiteX = 8;
-        int numSiteY = 1;
-        double U = 20.0;
-        // int numSam = 1;
-        int numEval = 4;
+        int numSiteX = 1;
+        int numSiteY = 8;
+        double U = 0.0;
+        int numSam = 100;
+        int numEval = 10;
 
-        Hubbard<std::complex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "PBC", "OBC");
-        int dim = Hub.HilbertDim();
-        // Hub.PrintHam();
+        for (int s = 0; s < numSam; ++s) {
+            Hubbard<std::complex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "OBC", "PBC");
+            int dim = Hub.HilbertDim();
+            if (0 == s) { Hub.SaveHilbert(); }
+            ARCompStdEig<double, Hubbard<std::complex<double>>> EigProb;
+            EigProb.DefineParameters(dim, numEval, &Hub, &Hubbard<std::complex<double>>::Hamiltonian, "SR");
+            auto eigVal = new std::complex<double>[numEval];
+            auto eigVec = new std::complex<double>[numEval*dim];
+            int nconv = EigProb.EigenValVectors(eigVec, eigVal);
 
-        ARCompStdEig<double, Hubbard<std::complex<double>>> prob;
-        prob.DefineParameters(dim, numEval, &Hub, &Hubbard<std::complex<double>>::Hamiltonian, "SR");
- 
-        auto eigVal = new std::complex<double>[numEval];
-        auto eigVec = new std::complex<double>[numEval*dim];
-        int nconv = prob.EigenValVectors(eigVec, eigVal);
-
-        std::vector<double> temp;
-        for (int j = 0; j < nconv; ++j) { temp.push_back(std::real(eigVal[j])); }
-        std::sort(temp.begin(), temp.end());
-
-        for (int j = 0; j < nconv; ++j) {
-            double r = std::real(eigVal[j]);
-            file_eigvals.write((char*)(&r), sizeof(double));
+            // To sort the eigenvalues and keep track of the index.
+            std::vector<std::pair<double, int>> temp;
+            for (int j = 0; j < nconv; ++j) { temp.push_back(std::pair<double, int> (std::real(eigVal[j]), j)); }
+            std::sort(temp.begin(), temp.end());
+            // for (auto a : temp) { std::cout << a.first << " " << a.second << std::endl; }
             // std::cout << "eval: " << std::setprecision(14) << temp[j] / (numSiteX*numSiteY) << std::endl;
-            std::cout << "eval: " << std::setprecision(14) << temp[j] << std::endl;
-            for (int k = 0; k < dim; ++k) {
-                double rr = std::real(eigVec[j*dim+k]);
-                double ii = std::imag(eigVec[j*dim+k]);
-                file_eigvecs.write((char*)(&rr), sizeof(double));
-                file_eigvecs.write((char*)(&ii), sizeof(double));
-                }
-            }
-        delete [] eigVal;
-        delete [] eigVec;
 
+            for (int j = 0; j < nconv; ++j) {
+                double val = temp[j].first;
+                int index = temp[j].second;
+                file_eigvals.write((char*)(&val), sizeof(double));
+                for (int k = 0; k < dim; ++k) {
+                    int d = index*dim+k;
+                    double rr = std::real(eigVec[d]);
+                    double ii = std::imag(eigVec[d]);
+                    file_eigvecs.write((char*)(&rr), sizeof(double));
+                    file_eigvecs.write((char*)(&ii), sizeof(double));
+                    }
+                }
+            delete [] eigVal;
+            delete [] eigVec;
+
+            std::cout << s << " " <<std::setprecision(2) << U << " " << std::setprecision(8) << temp[0].first << std::endl;
+            U += 0.5;
+            }
         end = time(NULL);
         file_log << "Time: " << (end-start)/60.0 << " min" << std::endl;
         std::cout << "Time: " << (end-start) << " s" << std::endl;
-        file_eigvals.close();
+file_eigvals.close();
         file_eigvecs.close();
         file_log.close();
         return 1;
-        }
+    }
