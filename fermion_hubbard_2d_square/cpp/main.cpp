@@ -20,6 +20,7 @@ int main() {
         for (int s = 0; s < numSam; ++s) {
             Hubbard<std::complex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "OBC", "PBC");
             int dim = Hub.HilbertDim();
+            std::cout << dim << std::endl;
             if (0 == s) { Hub.SaveHilbert(); }
             ARCompStdEig<double, Hubbard<std::complex<double>>> EigProb;
             EigProb.DefineParameters(dim, numEval, &Hub, &Hubbard<std::complex<double>>::Hamiltonian, "SR");

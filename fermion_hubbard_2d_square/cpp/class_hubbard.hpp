@@ -56,9 +56,6 @@ Hubbard<T>::Hubbard (double u, int numUp, int numDown, int numSiteX, int numSite
                         for (int k = 0; k < numSite; ++k) { bit.push_back(bitUp[k]); } // Basis of tensor product of up- and down-spins.
                         for (int k = 0; k < numSite; ++k) { bit.push_back(bitDown[k]); }
                         mBasis.push_back(bit.to_ulong());
-                        // std::cout << bit.to_ulong() << " ";
-                        // for (int l = 0; l < numSite*2; ++l) { std::cout << bit[l]; }
-                        // std::cout << std::endl;
                         ++dim;
                         }
                     }
@@ -66,6 +63,14 @@ Hubbard<T>::Hubbard (double u, int numUp, int numDown, int numSiteX, int numSite
             }
         std::sort(mBasis.begin(), mBasis.end());
         mDim = dim;
+        
+/*        for (int i = 0; i < dim; ++i) {
+            int s = mBasis[i];
+            std::cout << s << " ";
+            boost::dynamic_bitset<> bit(numSite*2, s);
+            for (int l = 0; l < numSite*2; ++l) { std::cout << bit[l]; }
+            std::cout << std::endl;
+            }*/
         }
 
 // Class destructor.
