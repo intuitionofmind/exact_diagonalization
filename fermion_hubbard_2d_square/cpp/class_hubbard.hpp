@@ -25,6 +25,8 @@ class Hubbard {
         void SaveHilbert();
         int Coordinate(int x, int y);
         void Hamiltonian(T* v, T* w);
+        void TotalSMinusSPlus(T* v, T* w);
+        void TotalSPlusSMinus(T* v, T* w);
         
         void SetOne(T* v, int i);
         T Dot(T* v, T* w);
@@ -179,33 +181,106 @@ void Hubbard<T>::Hamiltonian(T* v, T* w) {
         }
 
 // Note that the ArcomStdEig() in ARPACKPP will not sort the eigenvalues you want while ArsymStdEig() does. SortEval() funtion helps you to sort the eigenvalues and its order is stored in the vector "order" such that you can access the i'th smallest eigenvalues according to "order[i]" in the original sequence. 
-/*
 template<typename T>
-void Hubbard<T>::Sort(int n, T* w, T* v) { 
-        std::vector<double> vec;
-        for (int i = 0; i < n; ++i) { vec.push_back(std::real(w[i])); }
-        std::sort(vec.begin(), vec.end());
-
-        auto temp = new T[mDim*n];
-
-        for (int i = 0; i < n; ++i) {
-            std::vector<int>::iterator it = std::find(vec.begin(), vec.end(), std::real(w[i])); 
-            w[i] = T(vec[i]);
-            }
-
-
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                std::vector<int>::iterator it = std::find(order.begin(), order.end(), j); 
-                if (std::real(w2[i]) == std::real(w1[j]) && it == order.end()) {
-                    order.push_back(j);
+void Hubbard<T>::TotalSMinusSPlus(T* v, T* w) {
+        int numSite = mNumSiteX*mNumSiteY;
+        for (int l = 0; l < mDim; ++l) { w[l] = 0.0; }
+        for (int l = 0; l < mDim; ++l) {
+            if (0.0 == v[l]) { continue; }
+            int b = mBasis[l];
+            boost::dynamic_bitset<> config(numSite*2, b);
+            for (int i = 0; i < numSite; ++i) {
+                for (int j = 0; j < numSite; ++j) {
+                    boost::dynamic_bitset<> temp(config);
+                    if (i == j) {
+                        w[l] += double(config[numSite+j]-config[j]*config[numSite+j])*v[l];
+                        }
+                    else {
+                        int upI = i;
+                        int upJ = j;
+                        int downI = numSite+i;
+                        int downJ = numSite+j;
+                        if (1 == config[upI] && 0 == config[upJ] && 1 == config[downJ] && 0 == config[downI]) {
+                            int upCross = 0;
+                            int downCross = 0;
+                            if (i < j) {
+                                for (int m = upI+1; m < upJ; ++m) { if (config[m]) { ++upCross; } }
+                                for (int m = downJ-1; m > downI; --m) { if (config[m]) { ++downCross; } }
+                            }
+                            else {
+                                for (int m = upI-1; m > upJ; --m) { if (config[m]) { ++upCross; } }
+                                for (int m = downJ+1; m < downI; ++m) { if (config[m]) { ++downCross; } }
+                                }
+                            double fSign = pow(-1.0, upCross+downCross);
+                            temp.flip(upI);
+                            temp.flip(upJ);
+                            temp.flip(downI);
+                            temp.flip(downJ);
+                            std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
+                            w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
+                            }
+                        }
                     }
                 }
             }
-
-        delete [] temp;
         }
-    */
+
+template<typename T>
+void Hubbard<T>::TotalSPlusSMinus(T* v, T* w) {
+        int numSite = mNumSiteX*mNumSiteY;
+        for (int l = 0; l < mDim; ++l) { w[l] = 0.0; }
+        for (int l = 0; l < mDim; ++l) {
+            if (0.0 == v[l]) { continue; }
+            int b = mBasis[l];
+            boost::dynamic_bitset<> config(numSite*2, b);
+            for (int i = 0; i < numSite; ++i) {
+                for (int j = 0; j < numSite; ++j) {
+                    boost::dynamic_bitset<> temp(config);
+                    if (i == j) {
+                        w[l] += double(config[j]-config[j]*config[numSite+j])*v[l];
+                        }
+                    else {
+                        int upI = i;
+                        int upJ = j;
+                        int downI = numSite+i;
+                        int downJ = numSite+j;
+                        if (1 == config[upJ] && 0 == config[upI] && 1 == config[downI] && 0 == config[downJ]) {
+                            int upCross = 0;
+                            int downCross = 0;
+                            if (i < j) {
+                                for (int m = upJ-1; m > upI; --m) { if (config[m]) { ++upCross; } }
+                                for (int m = downI+1; m < downJ; ++m) { if (config[m]) { ++downCross; } }
+                            }
+                            else {
+                                for (int m = upJ+1; m < upI; ++m) { if (config[m]) { ++upCross; } }
+                                for (int m = downI-1; m > downJ; --m) { if (config[m]) { ++downCross; } }
+                                }
+                            double fSign = pow(-1.0, upCross+downCross);
+                            temp.flip(upI);
+                            temp.flip(upJ);
+                            temp.flip(downI);
+                            temp.flip(downJ);
+                            std::vector<int>::iterator it = std::lower_bound(mBasis.begin(), mBasis.end(), int(temp.to_ulong()));
+                            w[std::distance(mBasis.begin(), it)] += -1.0*fSign*v[l];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+/*
+template<typename T>
+void Hubbard<T>::SZSZ(T* v, T* w, int i, int j) {
+        for (int l = 0; l < mDim; ++l) { w[l] = 0.0; }
+        for (int l = 0; l < mDim; ++l) {
+            if (0.0 == v[l]) { continue; }
+            int b = mBasis[l];
+            boost::dynamic_bitset<> config(numSite*2, b);
+            }
+        }
+*/
+
 
 template<typename T>
 void Hubbard<T>::SetOne(T* v, int i) {

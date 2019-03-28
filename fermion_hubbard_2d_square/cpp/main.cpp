@@ -11,19 +11,22 @@ int main() {
 
         int numEleUp = 4;
         int numEleDown = 4;
-        int numSiteX = 1;
-        int numSiteY = 8;
+        int numSiteX = 2;
+        int numSiteY = 4;
         double U = 0.0;
         int numSam = 100;
         int numEval = 10;
 
+        std::ofstream file_data("results.dat", std::ios_base::app);
+        file_data << "u," << "gsE," <<  "trans" << std::endl;
+
         for (int s = 0; s < numSam; ++s) {
-            Hubbard<std::complex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "OBC", "PBC");
+            Hubbard<std::complex<double>> Hub(U, numEleUp, numEleDown, numSiteX, numSiteY, "OBC", "OBC");
             int dim = Hub.HilbertDim();
-            std::cout << dim << std::endl;
+            // std::cout << dim << std::endl;
             if (0 == s) { Hub.SaveHilbert(); }
             ARCompStdEig<double, Hubbard<std::complex<double>>> EigProb;
-            EigProb.DefineParameters(dim, numEval, &Hub, &Hubbard<std::complex<double>>::Hamiltonian, "SR");
+            EigProb.DefineParameters(dim, numEval, &Hub, &Hubbard<std::complex<double>>::Hamiltonian, "SR", 30);
             auto eigVal = new std::complex<double>[numEval];
             auto eigVec = new std::complex<double>[numEval*dim];
             int nconv = EigProb.EigenValVectors(eigVec, eigVal);
@@ -39,6 +42,7 @@ int main() {
                 double val = temp[j].first;
                 int index = temp[j].second;
                 file_eigvals.write((char*)(&val), sizeof(double));
+
                 for (int k = 0; k < dim; ++k) {
                     int d = index*dim+k;
                     double rr = std::real(eigVec[d]);
@@ -47,11 +51,27 @@ int main() {
                     file_eigvecs.write((char*)(&ii), sizeof(double));
                     }
                 }
+
+            auto gsWf = new std::complex<double>[dim];
+            auto gsWfTemp = new std::complex<double>[dim];
+            auto gsWfTempTemp = new std::complex<double>[dim];
+            for (int k = 0; k < dim; ++k) {
+                gsWf[k] = eigVec[(temp[0].second)*dim+k];
+                }
+            Hub.TotalSPlusSMinus(gsWf, gsWfTemp);
+            Hub.TotalSMinusSPlus(gsWf, gsWfTempTemp);
+            auto transv = 0.5*(Hub.Dot(gsWf, gsWfTemp)+Hub.Dot(gsWf, gsWfTempTemp));
+
             delete [] eigVal;
             delete [] eigVec;
+            delete [] gsWf;
+            delete [] gsWfTemp;
+            delete [] gsWfTempTemp;
 
-            std::cout << s << " " <<std::setprecision(2) << U << " " << std::setprecision(8) << temp[0].first << std::endl;
-            U += 0.5;
+            std::cout << s << " " <<std::setprecision(4) << U << " " << std::setprecision(8) << temp[0].first << " " << temp[1].first << " " << transv << std::endl;
+            file_data << std::setprecision(4) << U << "," << std::setprecision(8) << temp[0].first << "," << std::real(transv) << std::endl;
+            U += 2.0;
+
             }
         end = time(NULL);
         file_log << "Time: " << (end-start)/60.0 << " min" << std::endl;

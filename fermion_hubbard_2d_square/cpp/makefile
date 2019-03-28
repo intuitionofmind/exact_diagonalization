@@ -1,7 +1,7 @@
 PLAT = linux
-CPP = g++-mp-8
+CPP = c++
 
-PACKAGES_DIR = ${HOME}/Packages/
+PACKAGES_DIR = ${HOME}/Packages
 ARPACKPP_INC = ${PACKAGES_DIR}/arpackpp/include
 BOOST_INC = ${PACKAGES_DIR}/boost
 
